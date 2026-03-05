@@ -5,6 +5,7 @@ const chalk = require('chalk');
 const inquirer = require('inquirer');
 const ConfluenceClient = require('../lib/confluence-client');
 const { getConfig, initConfig } = require('../lib/config');
+const { performWebLogin } = require('../lib/web-auth');
 const Analytics = require('../lib/analytics');
 const pkg = require('../package.json');
 
@@ -30,6 +31,46 @@ program
   .option('-t, --token <token>', 'API token')
   .action(async (options) => {
     await initConfig(options);
+  });
+
+// Login via web browser command
+program
+  .command('login_web [domain]')
+  .description('Login via web browser (supports SSO, SAML, and interactive login)')
+  .option('--protocol <protocol>', 'Protocol (http or https)', 'https')
+  .option('--api-path <path>', 'REST API path (default: /wiki/rest/api for Cloud)')
+  .action(async (domain, options) => {
+    const analytics = new Analytics();
+    try {
+      if (!domain) {
+        // Prompt for domain if not provided
+        const answers = await inquirer.prompt([
+          {
+            type: 'input',
+            name: 'domain',
+            message: 'Confluence domain (e.g., your-company.atlassian.net):',
+            validate: (input) => {
+              if (!input || !input.trim()) {
+                return 'Domain is required';
+              }
+              return true;
+            }
+          }
+        ]);
+        domain = answers.domain;
+      }
+
+      await performWebLogin(domain, {
+        protocol: options.protocol,
+        apiPath: options.apiPath
+      });
+      
+      analytics.track('login_web', true);
+    } catch (error) {
+      analytics.track('login_web', false);
+      console.error(chalk.red('Error:'), error.message);
+      process.exit(1);
+    }
   });
 
 // Read command
