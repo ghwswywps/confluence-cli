@@ -30,7 +30,8 @@
     "html-to-text": "^9.0.5",
     "inquirer": "^8.2.6",
     "markdown-it": "^14.1.0",
-    "ora": "^5.4.1"
+    "ora": "^5.4.1",
+    "playwright-core": "^1.58.2"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
