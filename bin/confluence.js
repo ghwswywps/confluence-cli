@@ -264,12 +264,34 @@ program
       console.log(`Title: ${chalk.blue(result.title)}`);
       console.log(`ID: ${chalk.blue(result.id)}`);
       console.log(`Space: ${chalk.blue(result.space.name)} (${result.space.key})`);
-      console.log(`URL: ${chalk.gray(`${buildPageUrl(config, `/wiki${result._links.webui}`)}`)}`);
+      console.log(`URL: ${chalk.gray(`${buildPageUrl(config, `${result._links.webui}`)}`)}`);
       
       analytics.track('create', true);
     } catch (error) {
       analytics.track('create', false);
       console.error(chalk.red('Error:'), error.message);
+      // --- 新增：提取并打印详细的服务端错误信息 ---
+      if (error.response) {
+        // 如果底层使用了 axios 或类似的库，服务端响应通常在 error.response 中
+        console.error(chalk.yellow('Status Code:'), error.response.status);
+        
+        if (error.response.data) {
+          console.error(chalk.yellow('Server Details:'));
+          // 判断返回的是否是 JSON 对象，如果是则格式化打印，否则直接打印字符串
+          const details = typeof error.response.data === 'object' 
+            ? JSON.stringify(error.response.data, null, 2) 
+            : error.response.data;
+          console.error(chalk.gray(details));
+        }
+      } else if (error.body) {
+        // 兼容一些使用 got 或原生 fetch 封装的客户端
+        console.error(chalk.yellow('Server Details:'), error.body);
+      } else {
+        // 如果实在找不到 response，作为最后的手段，可以打印整个错误对象看看里面藏了什么
+        console.error(chalk.yellow('Full Error Object:'), error);
+      }
+      // ---------------------------------------------
+      
       process.exit(1);
     }
   });
@@ -312,12 +334,33 @@ program
       console.log(`ID: ${chalk.blue(result.id)}`);
       console.log(`Parent: ${chalk.blue(parentInfo.title)} (${parentId})`);
       console.log(`Space: ${chalk.blue(result.space.name)} (${result.space.key})`);
-      console.log(`URL: ${chalk.gray(`${buildPageUrl(config, `/wiki${result._links.webui}`)}`)}`);
+      console.log(`URL: ${chalk.gray(`${buildPageUrl(config, `${result._links.webui}`)}`)}`);
       
       analytics.track('create_child', true);
     } catch (error) {
       analytics.track('create_child', false);
       console.error(chalk.red('Error:'), error.message);
+      // --- 新增：提取并打印详细的服务端错误信息 ---
+      if (error.response) {
+        // 如果底层使用了 axios 或类似的库，服务端响应通常在 error.response 中
+        console.error(chalk.yellow('Status Code:'), error.response.status);
+        
+        if (error.response.data) {
+          console.error(chalk.yellow('Server Details:'));
+          // 判断返回的是否是 JSON 对象，如果是则格式化打印，否则直接打印字符串
+          const details = typeof error.response.data === 'object' 
+            ? JSON.stringify(error.response.data, null, 2) 
+            : error.response.data;
+          console.error(chalk.gray(details));
+        }
+      } else if (error.body) {
+        // 兼容一些使用 got 或原生 fetch 封装的客户端
+        console.error(chalk.yellow('Server Details:'), error.body);
+      } else {
+        // 如果实在找不到 response，作为最后的手段，可以打印整个错误对象看看里面藏了什么
+        console.error(chalk.yellow('Full Error Object:'), error);
+      }
+      // ---------------------------------------------
       process.exit(1);
     }
   });
@@ -359,7 +402,7 @@ program
       console.log(`Title: ${chalk.blue(result.title)}`);
       console.log(`ID: ${chalk.blue(result.id)}`);
       console.log(`Version: ${chalk.blue(result.version.number)}`);
-      console.log(`URL: ${chalk.gray(`${buildPageUrl(config, `/wiki${result._links.webui}`)}`)}`);
+      console.log(`URL: ${chalk.gray(`${buildPageUrl(config, `${result._links.webui}`)}`)}`);
       
       analytics.track('update', true);
     } catch (error) {
@@ -386,7 +429,7 @@ program
       console.log(`ID: ${chalk.blue(result.id)}`);
       console.log(`New Parent: ${chalk.blue(newParentId)}`);
       console.log(`Version: ${chalk.blue(result.version.number)}`);
-      console.log(`URL: ${chalk.gray(`${buildPageUrl(config, `/wiki${result._links.webui}`)}`)}`);
+      console.log(`URL: ${chalk.gray(`${buildPageUrl(config, `${result._links.webui}`)}`)}`);
 
       analytics.track('move', true);
     } catch (error) {
